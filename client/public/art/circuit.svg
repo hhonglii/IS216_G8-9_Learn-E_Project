@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 240" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <g stroke="#00f0ff" stroke-width="1.5" opacity=".7">
+    <path d="M40 200h120l40-40h80l40-40h120"/>
+    <path d="M120 40h80l40 40h100l40 40"/>
+    <path d="M240 220v-40l40-40"/>
+    <path d="M360 30v50l-20 20"/>
+  </g>
+  <g fill="#0b0e14" stroke-width="2">
+    <circle cx="160" cy="200" r="5" stroke="#00f0ff"/>
+    <circle cx="280" cy="160" r="5" stroke="#c273ff"/>
+    <circle cx="440" cy="120" r="5" stroke="#00f0ff"/>
+    <circle cx="200" cy="40" r="5" stroke="#ffb800"/>
+    <circle cx="340" cy="80" r="5" stroke="#00f5d4"/>
+    <circle cx="360" cy="30" r="5" stroke="#ff6487"/>
+  </g>
+</svg>

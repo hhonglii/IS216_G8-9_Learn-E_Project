@@ -1,0 +1,1817 @@
+{
+  "info": {
+    "name": "Learn-E API",
+    "description": "All product endpoints plus health, grouped by build phase. Every endpoint is implemented (Phases A to H); none returns 501. Contracts and current status are in docs/POSTMAN.md. Requests send Authorization: Bearer {{sessionToken}}; run Auth > Log in first to fill it, and Log out runs last. Get challenge uses expectedChallengeView for professor/learner response checks. Never store a database URI, GitHub token, Gemini API key, password or session token in this collection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// 204 replies (Log out, Change password) have no body to check.",
+          "if (pm.response.code !== 204) {",
+          "  pm.test('responds with JSON', () => pm.response.to.be.json);",
+          "  const body = pm.response.json();",
+          "  if (pm.response.code >= 400) {",
+          "    pm.test('error carries code, message and details', () => pm.expect(body.error).to.include.keys('code', 'message', 'details'));",
+          "  } else {",
+          "    pm.test('success uses the data envelope', () => pm.expect(body).to.have.property('data'));",
+          "  }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api"
+    },
+    {
+      "key": "sessionToken",
+      "value": "",
+      "description": "Filled by Auth > Log in and cleared by Log out. Never commit a value."
+    },
+    {
+      "key": "username",
+      "value": "",
+      "description": "For Log in. Leave blank in the committed file."
+    },
+    {
+      "key": "password",
+      "value": "",
+      "description": "For Log in, and the current password for Change password. Never commit a value."
+    },
+    {
+      "key": "newUsername",
+      "value": "",
+      "description": "For Register. Blank makes Register answer 400, so a run creates no account."
+    },
+    {
+      "key": "newPassword",
+      "value": "",
+      "description": "For Register. Never commit a value."
+    },
+    {
+      "key": "newDisplayName",
+      "value": "",
+      "description": "For Update me. Blank makes it answer 400, so a run renames nobody."
+    },
+    {
+      "key": "changedPassword",
+      "value": "",
+      "description": "For Change password. Blank makes it answer 400, so a run changes no password. Never commit a value."
+    },
+    {
+      "key": "userId",
+      "value": "507f1f77bcf86cd799439011"
+    },
+    {
+      "key": "classroomId",
+      "value": "507f1f77bcf86cd799439012"
+    },
+    {
+      "key": "challengeId",
+      "value": "507f1f77bcf86cd799439013"
+    },
+    {
+      "key": "attemptId",
+      "value": "507f1f77bcf86cd799439014"
+    },
+    {
+      "key": "helpRequestId",
+      "value": "507f1f77bcf86cd799439015"
+    },
+    {
+      "key": "miniProjectId",
+      "value": "507f1f77bcf86cd799439016"
+    },
+    {
+      "key": "groupId",
+      "value": "507f1f77bcf86cd799439017"
+    },
+    {
+      "key": "questionId",
+      "value": "",
+      "description": "A question block id from Get challenge"
+    },
+    {
+      "key": "groupUpdatedAt",
+      "value": "",
+      "description": "The group's updatedAt from Get mini-project, for Replace tasks (E-8)"
+    },
+    {
+      "key": "expectedChallengeView",
+      "value": "professor",
+      "type": "string"
+    },
+    {
+      "key": "materialId",
+      "value": ""
+    },
+    {
+      "key": "gamePlayId",
+      "value": "",
+      "description": "A run id, filled by Start game play"
+    },
+    {
+      "key": "gameQuestionId",
+      "value": "",
+      "description": "The run's current question id, filled by Start game play"
+    },
+    {
+      "key": "gameOptionId",
+      "value": "",
+      "description": "An answer id from that question, for Answer game play"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "description": "The only implemented endpoint. Returns data.status and data.database.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('health is ok', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().data.status).to.eql('ok');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth (G16)",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/register",
+            "description": "G16. Body { username, displayName, role, password }. 201 { data: { token, user } }. Validation runs before the database: a bad field is 400 VALIDATION_FAILED. A taken username is 409 USERNAME_TAKEN. With newUsername blank, the run gets 400 and creates nothing.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{newUsername}}\",\n  \"displayName\": \"New Student\",\n  \"role\": \"student\",\n  \"password\": \"{{newPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Log in",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "description": "G16. Body { username, password }. 200 { data: { token, user } }; the test saves data.token into sessionToken. A blank field, unknown username or wrong password is 401 INVALID_CREDENTIALS.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set('sessionToken', pm.response.json().data.token);",
+                  "  pm.test('login returns a token and the user', () => {",
+                  "    const data = pm.response.json().data;",
+                  "    pm.expect(data.token).to.be.a('string').and.not.empty;",
+                  "    pm.expect(data.user).to.include.keys('id', 'username', 'displayName', 'role');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/me",
+            "description": "G16. 200 { data: user } for a live session. No session is 401 UNAUTHENTICATED; an unknown, expired or malformed token is 401 INVALID_SESSION."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users (Phase A, G)",
+      "item": [
+        {
+          "name": "Get profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{userId}}/profile",
+            "description": "Phase A, D, G6 and G13. The logged-in caller and the profile target are separate people. Returns { id, displayName, role, classrooms, helpfulCount, milestones, nextMilestone, completedChallenges, projects }. nextMilestone is { label, threshold } for the first milestone above helpfulCount, or null once all three are reached. classrooms lists only classrooms the caller may see (a shared classroom, or the owning professor's), with stored contributionPoints. completedChallenges ({ challengeId, title, completedAt }, newest first: approved attempts with completedAt set) and projects ({ groupId, groupName, miniProjectId, miniProjectTitle, submissionStatus }) come from those same classrooms only, and are empty for a professor."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const reply = pm.response.json();",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test(\"Profile carries the Phase G lists\", function () {",
+                  "    pm.expect(reply.data.completedChallenges).to.be.an(\"array\");",
+                  "    pm.expect(reply.data.projects).to.be.an(\"array\");",
+                  "    for (const entry of reply.data.completedChallenges) {",
+                  "      pm.expect(entry).to.have.all.keys(\"challengeId\", \"title\", \"completedAt\");",
+                  "    }",
+                  "    for (const entry of reply.data.projects) {",
+                  "      pm.expect(entry).to.have.all.keys(\"groupId\", \"groupName\", \"miniProjectId\", \"miniProjectTitle\", \"submissionStatus\");",
+                  "    }",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update me",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/users/me",
+            "description": "G16 Step 11. Body { displayName }, trimmed, 1 to 60 characters. 200 { data: user }. No session is 401; a bad name is 400 VALIDATION_FAILED. With newDisplayName blank the run gets 400 and renames nobody.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"{{newDisplayName}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Change password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/users/me/password",
+            "description": "G16 Step 11. Body { currentPassword, newPassword }. 204 with no body, and every other session of this user ends. A wrong current password is 401 INVALID_CREDENTIALS; a weak new one is 400 VALIDATION_FAILED. With changedPassword blank the run gets 400 and changes nothing.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"{{password}}\",\n  \"newPassword\": \"{{changedPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Classrooms (Phase A, G)",
+      "item": [
+        {
+          "name": "Create classroom",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/classrooms",
+            "description": "Professor only. coverId is optional and must be one of the 13 ids in client/src/config/covers.js (G-10); any other value is 400 VALIDATION_FAILED with details.field \"coverId\". Every classroom response (create, join, Get classroom, the profile's shared classrooms) carries coverId, \"default\" when none was saved.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"IS216 G10\",\n  \"description\": \"Debugging practice\",\n  \"coverId\": \"teal-loop\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Join classroom",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/classrooms/join",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"joinCode\": \"CLASS42\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get classroom",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}",
+            "description": "Owning professor or member student only. Phase B challenge summaries: owner id/title/status for drafts and published; student published id/title plus their own progress { answered, total, reviewStatus } (H-21). No questions, answers, explanations or hints. Mini-projects remain empty until Phase E."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Validate the summary contract; authorization is separately covered by HTTP tests.",
+                  "if (pm.response.code === 200) {",
+                  "  const data = pm.response.json().data;",
+                  "  const ownerView = Object.hasOwn(data, \"joinCode\");",
+                  "  pm.test(\"Classroom challenge list contains summary fields only\", function () {",
+                  "    pm.expect(data.challenges).to.be.an(\"array\");",
+                  "    const fields = (ownerView ? [\"id\", \"title\", \"status\"] : [\"id\", \"progress\", \"title\"]).sort();",
+                  "    data.challenges.forEach(function (summary) {",
+                  "      pm.expect(Object.keys(summary).sort()).to.eql(fields);",
+                  "      pm.expect(summary.id).to.be.a(\"string\").and.match(/^[a-f0-9]{24}$/i);",
+                  "      pm.expect(summary.title).to.be.a(\"string\");",
+                  "      if (ownerView) pm.expect([\"draft\", \"published\"].includes(summary.status)).to.eql(true);",
+                  "      if (!ownerView) {",
+                  "        pm.expect(summary.progress.answered).to.be.a(\"number\");",
+                  "        pm.expect(summary.progress.total).to.be.a(\"number\");",
+                  "        pm.expect([\"not-submitted\", \"pending\", \"approved\", \"returned\"]).to.include(summary.progress.reviewStatus);",
+                  "      }",
+                  "    });",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}/leaderboard",
+            "description": "Member student or owning professor (Phase D and G4). Returns entries { userId, displayName, contributionPoints }, highest points first. Equal points go by display name A to Z ignoring capitals, then user id (decision G-6). A deleted user appears as \"Unknown student\" with userId null."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const reply = pm.response.json();",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test(\"Entries are in points, name, then user id order\", function () {",
+                  "    const entries = reply.data;",
+                  "    pm.expect(entries).to.be.an(\"array\");",
+                  "    for (let i = 1; i < entries.length; i++) {",
+                  "      const a = entries[i - 1];",
+                  "      const b = entries[i];",
+                  "      const order = b.contributionPoints - a.contributionPoints ||",
+                  "        (a.displayName ?? \"\").localeCompare(b.displayName ?? \"\", \"en\", { sensitivity: \"base\" }) ||",
+                  "        (a.userId ?? \"\").localeCompare(b.userId ?? \"\");",
+                  "      pm.expect(order, a.displayName + \" before \" + b.displayName).to.be.at.most(0);",
+                  "    }",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get insights",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}/insights",
+            "description": "Owning professor only (Phase C and G3). Returns { classroomId, pendingAppliedAttempts, pendingGroups, reviewedAttempts, reviewedGroups, summary }. Each pending attempt also carries appliedCasePrompt and officialExplanation (H-22). reviewedAttempts lists approved and returned diagnoses newest first ({ id, studentId, studentName, challengeId, challengeTitle, appliedDiagnosis, feedback, reviewStatus, reviewedAt }); reviewedGroups lists approved and returned groups ({ id, name, miniProjectId, miniProjectTitle, members, feedback, submissionStatus, reviewedAt }). pendingGroups lists this classroom's submitted groups, oldest first, with members, all five stage evidence fields, reflection and submittedAt. summary holds the nine counts defined in the G5 table of docs/steps/PHASE_G_STEPS.md: startedAttempts, completedAttempts, pendingAttemptReviews, pendingGroupReviews, wrongOptions (every wrong predict-output pick, retries included, G-7), openHelpRequests, timesMarkedUnresolved (sum of reopenCount, G-8), mostRequestedHintType (every tied type) and groupsByStatus. An empty classroom sends every count as 0."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const reply = pm.response.json();",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test(\"Insights carry both review queues and every summary count\", function () {",
+                  "    pm.expect(reply.data.pendingAppliedAttempts).to.be.an(\"array\");",
+                  "    pm.expect(reply.data.pendingGroups).to.be.an(\"array\");",
+                  "    pm.expect(reply.data.summary).to.include.keys(\"startedAttempts\", \"completedAttempts\", \"pendingAttemptReviews\", \"pendingGroupReviews\", \"wrongOptions\", \"openHelpRequests\", \"timesMarkedUnresolved\", \"mostRequestedHintType\", \"groupsByStatus\");",
+                  "    pm.expect(reply.data.summary.groupsByStatus).to.have.all.keys(\"draft\", \"submitted\", \"approved\", \"returned\");",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get what is waiting on me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/classrooms/waiting",
+            "description": "Any logged-in user (third-pass audit A). One row per classroom, longest wait first, then the classrooms with nothing waiting. A professor's row has classroomId, classroomName, pendingDiagnoses, pendingGroups, openHelpRequests and oldestWaitingAt. A student's row has classroomId, classroomName, returnedDiagnoses ({ challengeId, title }), returnedProjects ({ miniProjectId, title }), hintsToCheck, requestsToHelp (open questions from classmates on challenges you finished), newChallenges ({ challengeId, title }, published and not started), approvedDiagnoses ({ challengeId, title }, approved in the past 7 days) and oldestWaitingAt (H-22; approvals and new challenges don't set it). No session is 401."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.test(\"Rows are a list, each naming its classroom\", function () {",
+                  "    const rows = pm.response.json().data;",
+                  "    pm.expect(rows).to.be.an(\"array\");",
+                  "    rows.forEach((row) => pm.expect(row).to.include.keys(\"classroomId\", \"classroomName\", \"oldestWaitingAt\"));",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Challenges (Phase B)",
+      "item": [
+        {
+          "name": "Create challenge",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}/challenges",
+            "description": "Saves a draft. Uses docs/worksheets/PHASE_B_WORKSHEET.md B2a fixtures: predict-output has string option ids and an accepted id; locate-fault has line options (ids starting line-) and error-category options (ids starting category-), and its accepted answer names one of each as location and category; repair-order uses labelled step objects and an ordered array of string ids. Every block has an explanation. codeSnippet is stored once on the parent. The server assigns block order from array positions (B-8). Follows TEAM_DECISIONS B-3 to B-5: appliedCase is an object with a prompt, and no question block may have type applied-case. Publishing later needs at least 1 block and 2 progressive hints (B-1, B-2).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Off-by-one loop\",\n  \"language\": \"JavaScript\",\n  \"objective\": \"Find a boundary error\",\n  \"prompt\": \"Why does this loop miss the last item?\",\n  \"codeSnippet\": \"const items = [1, 2, 3];\\nfor (let i = 0; i < items.length - 1; i++) {\\n  console.log(items[i]);\\n}\",\n  \"questions\": [\n    {\n      \"type\": \"predict-output\",\n      \"prompt\": \"Which values does the shared loop log, in order, one value per line?\",\n      \"options\": [\n        {\n          \"id\": \"a\",\n          \"label\": \"1, then 2, then 3\"\n        },\n        {\n          \"id\": \"b\",\n          \"label\": \"1, then 2\"\n        },\n        {\n          \"id\": \"c\",\n          \"label\": \"2, then 3\"\n        }\n      ],\n      \"acceptedAnswer\": \"b\",\n      \"explanation\": \"items.length is 3, so i < 2 visits only indices 0 and 1 and logs 1, then 2.\"\n    },\n    {\n      \"type\": \"locate-fault\",\n      \"prompt\": \"Which line contains the fault, and what kind of error is it?\",\n      \"options\": [\n        {\n          \"id\": \"line-1\",\n          \"label\": \"line 1\"\n        },\n        {\n          \"id\": \"line-2\",\n          \"label\": \"line 2\"\n        },\n        {\n          \"id\": \"line-3\",\n          \"label\": \"line 3\"\n        },\n        {\n          \"id\": \"category-1\",\n          \"label\": \"boundary\"\n        },\n        {\n          \"id\": \"category-2\",\n          \"label\": \"syntax\"\n        }\n      ],\n      \"acceptedAnswer\": {\n        \"location\": \"line-2\",\n        \"category\": \"category-1\"\n      },\n      \"explanation\": \"The loop condition on line 2 stops before the final valid index because it subtracts 1 from items.length.\"\n    },\n    {\n      \"type\": \"repair-order\",\n      \"prompt\": \"Put these debugging steps in order, from diagnosing the skipped item to verifying the repair.\",\n      \"options\": [\n        {\n          \"id\": \"s2\",\n          \"label\": \"Change the condition to i < items.length.\"\n        },\n        {\n          \"id\": \"s3\",\n          \"label\": \"Run the loop and verify that it logs 1, then 2, then 3.\"\n        },\n        {\n          \"id\": \"s1\",\n          \"label\": \"Trace the loop indices and confirm that the final item is skipped.\"\n        }\n      ],\n      \"acceptedAnswer\": [\n        \"s1\",\n        \"s2\",\n        \"s3\"\n      ],\n      \"explanation\": \"First identify the skipped index, then correct the boundary, then run the loop to verify all three items.\"\n    }\n  ],\n  \"appliedCase\": {\n    \"prompt\": \"Explain the failure and propose a repair.\"\n  },\n  \"progressiveHints\": [\n    \"Check the loop bound\",\n    \"Compare with items.length\"\n  ],\n  \"explanation\": \"The loop stops one item early.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// B5a success checks; rejected requests use the shared error-envelope checks.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const data = pm.response.json().data;",
+                  "  pm.test(\"Create challenge returns 201 draft\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(201);",
+                  "    pm.expect(data.status).to.eql(\"draft\");",
+                  "  });",
+                  "  pm.test(\"Challenge resource ids are strings\", function () {",
+                  "    [data.id, data.classroomId, data.createdBy].forEach(function (id) {",
+                  "      pm.expect(id).to.be.a(\"string\").and.match(/^[a-f0-9]{24}$/i);",
+                  "    });",
+                  "  });",
+                  "  pm.test(\"Blocks have generated ids and array order\", function () {",
+                  "    pm.expect(data.questions).to.be.an(\"array\");",
+                  "    data.questions.forEach(function (block, index) {",
+                  "      pm.expect(block.id).to.be.a(\"string\").and.match(/^[a-f0-9]{24}$/i);",
+                  "      pm.expect(block.order).to.eql(index);",
+                  "    });",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update challenge",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/challenges/{{challengeId}}",
+            "description": "Partial update: only fields present change, and a questions list that is sent replaces the whole list (B-10). Sending status, createdBy or classroomId is a 400 (B-11). A published challenge is locked and returns 409 (B-9). Implemented B5b: existing block ids must belong to this challenge and be unique; new blocks omit id. The server assigns order. Concurrent stale saves return 409 CHALLENGE_CONFLICT.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Off-by-one loop\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// B5b/B7 professor DTO checks; unauthorized/error cases keep shared envelope tests.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  pm.test(\"Successful challenge update returns 200 and a draft DTO\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(data.status).to.eql(\"draft\");",
+                  "    pm.expect(data.id).to.be.a(\"string\").and.match(/^[a-f0-9]{24}$/i);",
+                  "    pm.expect(data.questions).to.be.an(\"array\");",
+                  "    const seen = new Set();",
+                  "    data.questions.forEach(function (block, index) {",
+                  "      pm.expect(block.id).to.be.a(\"string\").and.match(/^[a-f0-9]{24}$/i);",
+                  "      pm.expect(seen.has(block.id)).to.eql(false);",
+                  "      seen.add(block.id);",
+                  "      pm.expect(block.order).to.eql(index);",
+                  "    });",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Publish challenge",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/challenges/{{challengeId}}/publish",
+            "description": "B7 publishes stored content only. Incomplete/invalid drafts return 400 with field problems and remain draft. A complete draft becomes published; repeated publication returns 200 unchanged (B-12). Body content never completes or edits the stored draft.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// B5b/B7 professor DTO checks; unauthorized/error cases keep shared envelope tests.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  pm.test(\"Successful challenge publication returns 200 and a published DTO\", function () {",
+                  "    const data = pm.response.json().data;",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(data.status).to.eql(\"published\");",
+                  "    pm.expect(data.id).to.be.a(\"string\").and.match(/^[a-f0-9]{24}$/i);",
+                  "    pm.expect(data.questions).to.be.an(\"array\");",
+                  "    const seen = new Set();",
+                  "    data.questions.forEach(function (block, index) {",
+                  "      pm.expect(block.id).to.be.a(\"string\").and.match(/^[a-f0-9]{24}$/i);",
+                  "      pm.expect(seen.has(block.id)).to.eql(false);",
+                  "      seen.add(block.id);",
+                  "      pm.expect(block.order).to.eql(index);",
+                  "    });",
+                  "  });",
+                  "}",
+                  "if (pm.response.code === 400 && pm.response.json().error.code === \"VALIDATION_FAILED\") {",
+                  "  pm.test(\"Rejected publication lists field problems\", function () {",
+                  "    const details = pm.response.json().error.details;",
+                  "    pm.expect(details).to.be.an(\"array\");",
+                  "    pm.expect(details.length > 0).to.eql(true);",
+                  "    details.forEach(function (item) {",
+                  "      pm.expect(item.field).to.be.a(\"string\");",
+                  "      pm.expect(item.message).to.be.a(\"string\");",
+                  "    });",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Generate challenge content (Gemini)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}/challenge-content-drafts",
+            "description": "B-15/B-16: owning professor of the classroom only. Generates one field from the editor's current values without creating or saving a challenge. field is prompt, codeSnippet, explanation or appliedCasePrompt. title, language and objective are always required; codeSnippet also needs prompt, and explanation and appliedCasePrompt also need prompt and codeSnippet. Only those preceding fields reach Gemini. 200 { data: { field, content } }. A bad classroom id, unsupported field or missing prerequisite is 400 CONTENT_DRAFT_INVALID. Missing configuration is 503 CONTENT_DRAFTS_UNAVAILABLE, upstream 429 is 503 CONTENT_DRAFTS_RATE_LIMITED, other upstream/network/timeout/output failures are 502 CONTENT_DRAFTS_FAILED. Each successful send spends real Gemini free-tier quota.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"field\": \"prompt\",\n  \"draft\": {\n    \"title\": \"Off-by-one loop\",\n    \"language\": \"JavaScript\",\n    \"objective\": \"Find a boundary error\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const reply = pm.response.json();",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test(\"Generated content holds only the requested field and non-empty text\", function () {",
+                  "    pm.expect(Object.keys(reply.data || {}).sort().join(\",\")).to.eql(\"content,field\");",
+                  "    pm.expect(reply.data.field).to.eql(JSON.parse(pm.request.body.raw).field);",
+                  "    pm.expect(typeof reply.data.content === \"string\" && reply.data.content.trim().length > 0).to.eql(true);",
+                  "  });",
+                  "} else if (pm.response.code === 400) {",
+                  "  pm.test(\"Rejected generation requests use the named error\", function () {",
+                  "    pm.expect(reply.error.code).to.eql(\"CONTENT_DRAFT_INVALID\");",
+                  "  });",
+                  "} else if (pm.response.code === 503) {",
+                  "  pm.test(\"Unavailable or rate-limited generation uses named errors\", function () {",
+                  "    pm.expect([\"CONTENT_DRAFTS_UNAVAILABLE\", \"CONTENT_DRAFTS_RATE_LIMITED\"].includes(reply.error.code)).to.eql(true);",
+                  "  });",
+                  "} else if (pm.response.code === 502) {",
+                  "  pm.test(\"Failed generation uses the safe error code\", function () {",
+                  "    pm.expect(reply.error.code).to.eql(\"CONTENT_DRAFTS_FAILED\");",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Draft hints (Gemini)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/challenges/{{challengeId}}/hint-drafts",
+            "description": "Implemented B9a/B9b/B9c (B-13/B-14): owning professor of a saved draft only; published is 409. Empty body is ignored. Only stored title/language/objective/prompt/codeSnippet, question type/prompt and appliedCase.prompt are sent to Gemini, with no answers/explanations/options/hints/student data. 200 { data: { hints: [2 or 3 non-empty strings] } }; nothing saved. Missing configuration is 503 HINT_DRAFTS_UNAVAILABLE, upstream 429 is 503 HINT_DRAFTS_RATE_LIMITED, other upstream/network/timeout/output failures are 502 HINT_DRAFTS_FAILED. Configure credentials only on the server and restart after editing the model/key.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const reply = pm.response.json();",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test(\"Hint drafts contain only 2 or 3 non-empty hints\", function () {",
+                  "    const hints = reply.data && reply.data.hints;",
+                  "    pm.expect(Object.keys(reply.data || {}).join(\",\")).to.eql(\"hints\");",
+                  "    pm.expect(Array.isArray(hints) && hints.length >= 2 && hints.length <= 3 && hints.every(function (hint) { return typeof hint === \"string\" && hint.trim().length > 0; })).to.eql(true);",
+                  "  });",
+                  "} else if (pm.response.code === 503) {",
+                  "  pm.test(\"Unavailable or rate-limited hint drafts use named errors\", function () {",
+                  "    pm.expect([\"HINT_DRAFTS_UNAVAILABLE\", \"HINT_DRAFTS_RATE_LIMITED\"].includes(reply.error.code)).to.eql(true);",
+                  "  });",
+                  "} else if (pm.response.code === 502) {",
+                  "  pm.test(\"Failed hint drafts use the safe error code\", function () {",
+                  "    pm.expect(reply.error.code).to.eql(\"HINT_DRAFTS_FAILED\");",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get challenge",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/challenges/{{challengeId}}",
+            "description": "B8: owning professor reads drafts/published with answers; a joined student reads published content only. Member drafts return 404 (B-6), other callers 403. Set expectedChallengeView to professor or learner for response checks. A learner's reply carries hintCount (how many progressive hints exist, not the hints) and their attempt, whose unlockedHints lists one hint per wrong answer so far (H-7)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// B8 response checks. expectedChallengeView changes only test assertions.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const data = pm.response.json().data;",
+                  "  const view = pm.variables.get(\"expectedChallengeView\");",
+                  "  pm.test(\"Get challenge returns 200 with sorted block ids\", function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(data.id).to.be.a(\"string\").and.match(/^[a-f0-9]{24}$/i);",
+                  "    pm.expect(data.questions).to.be.an(\"array\");",
+                  "    data.questions.forEach(function (block, index) {",
+                  "      pm.expect(block.id).to.be.a(\"string\").and.match(/^[a-f0-9]{24}$/i);",
+                  "      pm.expect(block.order).to.be.a(\"number\");",
+                  "      if (index) pm.expect(data.questions[index - 1].order <= block.order).to.eql(true);",
+                  "    });",
+                  "  });",
+                  "  pm.test(\"Expected challenge view is configured\", function () {",
+                  "    pm.expect([\"professor\", \"learner\"].includes(view)).to.eql(true);",
+                  "  });",
+                  "  if (view === \"professor\") {",
+                  "    pm.test(\"Professor receives answer fields and hints\", function () {",
+                  "      pm.expect(data.explanation).to.be.a(\"string\");",
+                  "      pm.expect(data.progressiveHints).to.be.an(\"array\");",
+                  "      data.questions.forEach(function (block) {",
+                  "        pm.expect(Object.hasOwn(block, \"acceptedAnswer\")).to.eql(true);",
+                  "        pm.expect(block.explanation).to.be.a(\"string\");",
+                  "      });",
+                  "    });",
+                  "  } else if (view === \"learner\") {",
+                  "    pm.test(\"Learner receives published content without private fields\", function () {",
+                  "      pm.expect(data.status).to.eql(\"published\");",
+                  "      function check(value) {",
+                  "        if (value === null || typeof value !== \"object\") return;",
+                  "        Object.entries(value).forEach(function (entry) {",
+                  "          pm.expect([\"acceptedAnswer\", \"explanation\", \"progressiveHints\"].includes(entry[0])).to.eql(false);",
+                  "          check(entry[1]);",
+                  "        });",
+                  "      }",
+                  "      check(data);",
+                  "    });",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete challenge draft",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/challenges/{{challengeId}}",
+            "description": "Owning professor only (H-11). Removes a draft for good. 204 with no body; a published challenge answers 409 CHALLENGE_PUBLISHED, so running this after Publish challenge leaves the challenge in place."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attempts and review (Phase C)",
+      "item": [
+        {
+          "name": "Create attempt",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/challenges/{{challengeId}}/attempts",
+            "description": "One block per request (C-1). One Attempt per student and challenge; every submission is appended to answers as { questionId, value, correct, submittedAt } (C-2). 201 when this creates the Attempt, 200 when it adds to it (C-10). Set questionId to a real block id from Get challenge. The reply's unlockedHints lists the progressive hints unlocked so far, one per wrong answer (H-7).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"{{questionId}}\",\n  \"value\": \"option-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Submit applied diagnosis",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/attempts/{{attemptId}}/applied",
+            "description": "Body field matches the stored field (C-11). The owner may replace a pending diagnosis until it is reviewed (C-7); approved work is final and returns 409 (C-6).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appliedDiagnosis\": \"The loop bound excludes the final element.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Review attempt",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/attempts/{{attemptId}}/review",
+            "description": "decision is approve or return (C-12); feedback is required on return (C-13). Approval is what unlocks mentoring for that challenge.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"approve\",\n  \"feedback\": \"Correct diagnosis.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Help requests (Phase D)",
+      "item": [
+        {
+          "name": "Create question help request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/help-requests",
+            "description": "Question help (H-14): contextType \"challenge\", contextId a published challenge in a classroom you belong to, questionId one block id from Get challenge, and a hintType. No text fields. Only a classmate whose applied diagnosis for that challenge was approved can claim it. classroomId is derived from the challenge on the server. If your last answer to that question was wrong, the server saves it in plain words as askerAnswer (H-22).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contextType\": \"challenge\",\n  \"contextId\": \"{{challengeId}}\",\n  \"questionId\": \"{{questionId}}\",\n  \"hintType\": \"Fault-location clue\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create general class help request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/help-requests",
+            "description": "General class help (H-14): contextType \"classroom\", contextId your classroom, and codeSnippet, expectedBehaviour and actualBehaviour (all required after trim) plus a hintType. Any other member of the classroom can claim it.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contextType\": \"classroom\",\n  \"contextId\": \"{{classroomId}}\",\n  \"codeSnippet\": \"for (let i = 0; i <= n; i++) total += i\",\n  \"expectedBehaviour\": \"Adds 0 to n - 1\",\n  \"actualBehaviour\": \"Also adds n\",\n  \"hintType\": \"Guiding question\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "List classroom help requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}/help-requests",
+            "description": "No official answer may appear in this response. A question help request carries challengeCode, the challenge's code snippet (H-22). askerAnswer, the asker's last wrong answer, is sent only to the asker, the claiming mentor, the owning professor and members who could claim the request."
+          }
+        },
+        {
+          "name": "Claim help request",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/help-requests/{{helpRequestId}}/claim",
+            "description": "The winning mentor repeating the claim gets 200; anyone else gets 409 (D-7).",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Respond to help request",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/help-requests/{{helpRequestId}}/respond",
+            "description": "At most 1000 characters after trim (D-9). The assigned mentor may overwrite the hint until the request is resolved (D-8).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"response\": \"Compare your loop bound with items.length.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Resolve help request",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/help-requests/{{helpRequestId}}/resolve",
+            "description": "A repeat helpful returns 200 and awards nothing (D-10). Unresolved clears claimedBy, mentorResponse and helpful and increments reopenCount (D-3, G-8).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resolution\": \"helpful\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mini-projects and groups (Phase E, F, G)",
+      "item": [
+        {
+          "name": "Create mini-project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}/mini-projects",
+            "description": "Saves a new draft (H-8). Only the title is required; every other field is checked for type and may be left blank until publishing. Blank criteria are dropped, and a blank starterRepoUrl or qualifyingChallengeId means none. Students can't see a draft. qualifyingChallengeId must be a published challenge in this classroom (E-2). maxGroupSize has no upper limit (E-3) and defaults to 2. The starter repository is shown as a link and never fetched (F-2). Copy the returned id into miniProjectId, then Publish mini-project.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Event registration repair\",\n  \"brief\": \"Diagnose and repair the registration flow.\",\n  \"starterRepoUrl\": \"https://github.com/example/starter\",\n  \"maxGroupSize\": 4,\n  \"qualifyingChallengeId\": \"{{challengeId}}\",\n  \"stageInstructions\": {\n    \"Diagnose\": \"Symptoms and causes\",\n    \"Repair\": \"Fixes mapped to criteria\",\n    \"Extend\": \"One small feature\",\n    \"Verify\": \"Tests or repeatable checks\",\n    \"Reflect\": \"Why the repair works\"\n  },\n  \"acceptanceCriteria\": [\n    \"Works on a phone\",\n    \"Rejects invalid sign-ups\"\n  ],\n  \"rubric\": \"Evidence quality\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update mini-project draft",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mini-projects/{{miniProjectId}}",
+            "description": "Owning professor only (H-8). Saves changes to a draft; fields left out keep their saved values, and the same draft rules as Create apply. A published brief answers 409 MINIPROJECT_PUBLISHED, because published briefs can't be edited. status, createdBy and classroomId in the body are ignored.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Event registration repair\",\n  \"rubric\": \"Evidence quality and a working repair\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Publish mini-project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mini-projects/{{miniProjectId}}/publish",
+            "description": "Owning professor only (H-8). Checks the saved draft: title, brief, rubric, all five stage instructions and at least one acceptance criterion must be filled in, and a qualifying challenge must still be published in this classroom. Problems come back together as 400 VALIDATION_FAILED and the brief stays a draft. Success is 200 with status published; publishing again answers the same brief.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get mini-project",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/mini-projects/{{miniProjectId}}",
+            "description": "The owning professor sees every group's full workspace (E-6). Note the group's updatedAt for Replace tasks."
+          }
+        },
+        {
+          "name": "Upload mini-project material",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/octet-stream"
+              },
+              {
+                "key": "X-File-Name",
+                "value": "Week%203%20brief.pdf"
+              }
+            ],
+            "url": "{{baseUrl}}/mini-projects/{{miniProjectId}}/materials",
+            "description": "Owning professor only, while the brief is a draft (H-10). Choose a PDF or zip as the binary body and put its URI-encoded name in X-File-Name. Files can be up to 4 MB (larger answers 413 PAYLOAD_TOO_LARGE; H-23) and a brief holds at most 5. The server checks the file's first bytes, so a renamed program answers 400 VALIDATION_FAILED. A published brief answers 409 MINIPROJECT_PUBLISHED. 201 with { id, name, size, contentType, uploadedAt }; copy the id into materialId.",
+            "body": {
+              "mode": "file",
+              "file": {
+                "src": ""
+              }
+            }
+          }
+        },
+        {
+          "name": "Download mini-project material",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/mini-projects/{{miniProjectId}}/materials/{{materialId}}",
+            "description": "Anyone who can open the brief (H-10): the owning professor, or a member student once it is published (a student gets 404 for a draft's file). Answers the file as an attachment with its original name. Use Send and Download in Postman to save it."
+          }
+        },
+        {
+          "name": "Delete mini-project material",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/mini-projects/{{miniProjectId}}/materials/{{materialId}}",
+            "description": "Owning professor only, while the brief is a draft (H-10). Removes the file from the brief and from storage. 204 with no body; a published brief answers 409 MINIPROJECT_PUBLISHED."
+          }
+        },
+        {
+          "name": "Create group",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mini-projects/{{miniProjectId}}/groups",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Group A\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Join group",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}/join",
+            "description": "Joining a group you are already in returns 200; another group in the same project or a full group is 409 (E-7).",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Replace tasks",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}/tasks",
+            "description": "Whole-array replacement guarded by updatedAt (E-8): send the group's updatedAt from Get mini-project; a stale value gets 409 and the page reloads.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tasks\": [\n    {\n      \"title\": \"Fix validation\",\n      \"ownerId\": \"{{userId}}\",\n      \"status\": \"todo\",\n      \"evidenceUrl\": \"\"\n    }\n  ],\n  \"updatedAt\": \"{{groupUpdatedAt}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update stage evidence",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}/stages",
+            "description": "Merge by stage key: only the stages present in the body change (E-5).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stageEvidence\": {\n    \"Diagnose\": \"Form accepts empty names\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Attach repository",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}/repository",
+            "description": "Implemented F4 (F-1, F-5): group members only. Body { repositoryUrl } must be a public https://github.com/owner/repo link; a trailing slash, .git and surrounding spaces are accepted and stored as https://github.com/owner/repo. A changed link clears the cached GitHub snapshot; sending the link already attached changes nothing. Nothing is fetched from GitHub here (that is Refresh GitHub data). 200 { data: { id, repositoryUrl, updatedAt } }. Missing or blank link is 400 VALIDATION_FAILED (field repositoryUrl); any other link is 400 INVALID_GITHUB_REPOSITORY_URL; no selected user 401, bad id 400, outsider 403, missing group 404 GROUP_NOT_FOUND.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"repositoryUrl\": \"https://github.com/octocat/Hello-World\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const reply = pm.response.json();",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test(\"Attached repository returns only id, repositoryUrl and updatedAt\", function () {",
+                  "    pm.expect(Object.keys(reply.data).sort().join(\",\")).to.eql(\"id,repositoryUrl,updatedAt\");",
+                  "    pm.expect(typeof reply.data.id).to.eql(\"string\");",
+                  "  });",
+                  "  pm.test(\"Link is stored in the standard form\", function () {",
+                  "    pm.expect(reply.data.repositoryUrl).to.match(/^https:\\/\\/github\\.com\\/[^/]+\\/[^/]+$/);",
+                  "    pm.expect(reply.data.repositoryUrl).to.not.match(/\\.git$/);",
+                  "  });",
+                  "} else if (pm.response.code === 400) {",
+                  "  pm.test(\"A rejected link or id uses a named error\", function () {",
+                  "    pm.expect([\"VALIDATION_FAILED\", \"INVALID_GITHUB_REPOSITORY_URL\"].includes(reply.error.code)).to.eql(true);",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh GitHub data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}/github/refresh",
+            "description": "Implemented F5 (F-3, F-6): group members and the owning professor. Empty body. Fetches the attached repository, its five latest commits and its top 10 contributors (F-7) from api.github.com, then saves them as the group's snapshot with a new lastRefreshedAt. 200 { data: { repositoryUrl, repository, commits, contributors, lastRefreshedAt } }. No link attached is 409 REPOSITORY_NOT_ATTACHED (GitHub is not called); a link changed during the refresh is 409 REPOSITORY_CHANGED. A GitHub failure returns only its named error and leaves the old snapshot untouched: 404 GITHUB_REPOSITORY_NOT_FOUND, 400 GITHUB_REPOSITORY_PRIVATE, 429 GITHUB_RATE_LIMITED, 502 GITHUB_UNAVAILABLE. Each send spends three requests of real GitHub quota (60 an hour without a server token).",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const reply = pm.response.json();",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test(\"Refreshed snapshot carries the link, repository, commits, contributors and time\", function () {",
+                  "    pm.expect(reply.data.repositoryUrl).to.match(/^https:\\/\\/github\\.com\\/[^/]+\\/[^/]+$/);",
+                  "    pm.expect(reply.data.repository).to.be.an(\"object\");",
+                  "    pm.expect(Array.isArray(reply.data.commits) && reply.data.commits.length <= 5).to.eql(true);",
+                  "    pm.expect(Array.isArray(reply.data.contributors) && reply.data.contributors.length <= 10).to.eql(true);",
+                  "    pm.expect(Number.isNaN(Date.parse(reply.data.lastRefreshedAt))).to.eql(false);",
+                  "  });",
+                  "} else if (pm.response.code === 409) {",
+                  "  pm.test(\"A refresh that does not fit the group uses a named error\", function () {",
+                  "    pm.expect([\"REPOSITORY_NOT_ATTACHED\", \"REPOSITORY_CHANGED\"].includes(reply.error.code)).to.eql(true);",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Submit group",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}/submit",
+            "description": "Implemented G1 (G-1, G-2, G-3): group members only. Body { reflection }. Needs non-empty Diagnose, Repair and Verify evidence in the saved group plus a reflection of 1 to 5000 characters after trimming; every gap is listed at once in a 400 VALIDATION_FAILED whose details name stageEvidence.Diagnose, stageEvidence.Repair, stageEvidence.Verify or reflection. Draft or returned work moves to submitted; any earlier professorFeedback is kept. 200 { data: { id, submissionStatus, reflection, professorFeedback, updatedAt } }. Work already submitted or approved (approved is final) is 409 INVALID_SUBMISSION_STATUS, as is a submit that loses a race with another member.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reflection\": \"The validation failed because the check ran after submit.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const reply = pm.response.json();",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test(\"Submitted group carries its status, reflection and feedback\", function () {",
+                  "    pm.expect(reply.data.submissionStatus).to.eql(\"submitted\");",
+                  "    pm.expect(reply.data.reflection).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(reply.data.professorFeedback).to.be.a(\"string\");",
+                  "  });",
+                  "}",
+                  "if (pm.response.code === 400 && reply.error.code === \"VALIDATION_FAILED\" && Array.isArray(reply.error.details)) {",
+                  "  pm.test(\"Each missing item names its field\", function () {",
+                  "    reply.error.details.forEach((detail) => pm.expect(detail.field).to.match(/^(stageEvidence\\.(Diagnose|Repair|Verify)|reflection)$/));",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Review group",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/groups/{{groupId}}/review",
+            "description": "Implemented G2 (G-4, G-5): the professor who owns the classroom only; group members get 403. Body { decision, feedback } with decision \"approve\" or \"return\"; feedback is required on a return (400 VALIDATION_FAILED otherwise). Only submitted work can be reviewed: anything else, or a review that loses a race, is 409 INVALID_REVIEW_STATUS. Sets only submissionStatus (approved or returned) and professorFeedback; stage evidence and reflection stay. 200 { data: { id, submissionStatus, professorFeedback, updatedAt } }.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"approve\",\n  \"feedback\": \"Good evidence.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const reply = pm.response.json();",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test(\"Reviewed group is approved or returned, with its feedback\", function () {",
+                  "    pm.expect([\"approved\", \"returned\"]).to.include(reply.data.submissionStatus);",
+                  "    pm.expect(reply.data.professorFeedback).to.be.a(\"string\");",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete mini-project draft",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/mini-projects/{{miniProjectId}}",
+            "description": "Owning professor only (H-11). Removes a draft and its uploaded files for good. 204 with no body; a published brief answers 409 MINIPROJECT_PUBLISHED, so running this after Publish mini-project leaves the brief in place."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Classroom games (H-15 to H-20)",
+      "item": [
+        {
+          "name": "Get classroom game",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}/game",
+            "description": "Owning professor or member student (H-15). The professor gets { viewer: \"professor\", game } with the full editable game, or game null before the first save. A student gets { viewer: \"student\", game, play, defeated }: game is null unless one is published, and otherwise holds only the title, monster, hearts and question count. play is their run in progress or null, and its current question never says which answer is right. Anyone else is 403."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const data = pm.response.json().data;",
+                  "  pm.test(\"Says who is looking\", () => pm.expect(data.viewer).to.be.oneOf([\"professor\", \"student\"]));",
+                  "  if (data.viewer === \"student\") {",
+                  "    pm.test(\"A student's copy hides the questions and right answers\", function () {",
+                  "      if (data.game) pm.expect(data.game).to.not.have.property(\"questions\");",
+                  "      const current = data.play && data.play.currentQuestion;",
+                  "      if (current) pm.expect(current).to.not.have.any.keys(\"correctOptionId\", \"explanation\");",
+                  "    });",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Save classroom game",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}/game",
+            "description": "Owning professor only (H-15). The editor's autosave target: the first save creates the draft (201), later saves update it (200). Send only the fields you change. A draft only has to be well formed: bossId is one of null-slime, infinite-wyrm, off-by-one-golem, memory-kraken, race-ghost or syntax-spider, hearts is 1 to 10, at most 50 questions, and each question and answer needs its own id (letters, digits, - or _). Bad input is 400 VALIDATION_FAILED with a field per problem. A published game is 409 GAME_PUBLISHED until it is unpublished.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Week 3: Loops\",\n  \"bossId\": \"memory-kraken\",\n  \"hearts\": 3,\n  \"questions\": [\n    {\n      \"id\": \"q1\",\n      \"code\": \"for i in range(3):\\n    print(i)\",\n      \"prompt\": \"What is the last number printed?\",\n      \"options\": [\n        {\n          \"id\": \"a\",\n          \"label\": \"2\"\n        },\n        {\n          \"id\": \"b\",\n          \"label\": \"3\"\n        },\n        {\n          \"id\": \"c\",\n          \"label\": \"0\"\n        }\n      ],\n      \"correctOptionId\": \"a\",\n      \"explanation\": \"range(3) stops before 3, so the loop prints 0, 1 and 2.\",\n      \"keepOrder\": false\n    },\n    {\n      \"id\": \"q2\",\n      \"code\": \"\",\n      \"prompt\": \"Which loop runs at least once?\",\n      \"options\": [\n        {\n          \"id\": \"a\",\n          \"label\": \"for\"\n        },\n        {\n          \"id\": \"b\",\n          \"label\": \"while\"\n        },\n        {\n          \"id\": \"c\",\n          \"label\": \"do-while\"\n        }\n      ],\n      \"correctOptionId\": \"c\",\n      \"explanation\": \"A do-while checks its condition after the body runs.\",\n      \"keepOrder\": false\n    },\n    {\n      \"id\": \"q3\",\n      \"code\": \"i = 0\\nwhile i < 5:\\n    print(i)\",\n      \"prompt\": \"Why does this loop never stop?\",\n      \"options\": [\n        {\n          \"id\": \"a\",\n          \"label\": \"i never changes\"\n        },\n        {\n          \"id\": \"b\",\n          \"label\": \"5 is too big\"\n        },\n        {\n          \"id\": \"c\",\n          \"label\": \"print returns None\"\n        }\n      ],\n      \"correctOptionId\": \"a\",\n      \"explanation\": \"Nothing in the body changes i, so i < 5 stays true.\",\n      \"keepOrder\": false\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Generate game questions (Gemini)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}/game/question-drafts",
+            "description": "Owning professor only (H-15). Needs the server's GEMINI_API_KEY and GEMINI_MODEL, the same settings as Generate challenge content. Give a topic or some code, and count 1 to 10 (default 5). Returns { questions } and saves nothing: the editor adds them as drafts the professor approves. 400 GAME_DRAFT_INVALID for a bad request, 503 GAME_DRAFTS_UNAVAILABLE without a key, 503 GAME_DRAFTS_RATE_LIMITED, 502 GAME_DRAFTS_FAILED. Each send spends real quota.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"topic\": \"for loops and range()\",\n  \"language\": \"Python\",\n  \"code\": \"\",\n  \"count\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Publish classroom game",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}/game/publish",
+            "description": "Owning professor only (H-15). Checks the saved game, not the request: a title, a monster, at least three questions, and for each one its text, at least two different answers, a right answer, a Why? explanation and no unapproved generated draft. Problems come back together as 400 VALIDATION_FAILED. Success is 200 with status published, and each publication starts fresh results. Publishing again changes nothing. No game yet is 404 GAME_NOT_FOUND.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get game results",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}/game/results",
+            "description": "Owning professor only (H-15, H-20). Results for the current publication: how many played and won, per-question first-try accuracy and the most common wrong answer, and a students list with each member's name, attempts and best result (won, lost, playing or not-played). It never shows which answers a student picked. A student is 403."
+          }
+        },
+        {
+          "name": "Start game play",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}/game/plays",
+            "description": "Member student only (H-15). Starts a run (201) or returns the one already in progress (200) as { play }. Its test saves play.id into gamePlayId and the current question's id into gameQuestionId; set gameOptionId to one of that question's answer ids before Answer game play. No published game is 404 GAME_NOT_FOUND; the professor or a non-member is 403.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "  const play = pm.response.json().data.play;",
+                  "  pm.test(\"Returns a run with an id\", () => pm.expect(play.id).to.be.a(\"string\"));",
+                  "  pm.collectionVariables.set(\"gamePlayId\", play.id);",
+                  "  if (play.currentQuestion) pm.collectionVariables.set(\"gameQuestionId\", play.currentQuestion.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Answer game play",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/game-plays/{{gamePlayId}}/answers",
+            "description": "The student who owns the run (H-15, H-20). Answers the current question only. answerCount (optional) is how many answers the browser has seen, so a stale tab can't spend a heart. Replies { correct, explanation, play }. explanation is empty after a wrong answer, since that question comes back (H-20); What to review lists it at the end. A wrong question or a changed game is 409 PLAY_CHANGED, an option that isn't offered is 400 VALIDATION_FAILED, someone else's run is 403.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionId\": \"{{gameQuestionId}}\",\n  \"optionId\": \"{{gameOptionId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const data = pm.response.json().data;",
+                  "  pm.test(\"A wrong answer gives no explanation away\", function () {",
+                  "    if (!data.correct) pm.expect(data.explanation).to.equal(\"\");",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unpublish classroom game",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}/game/unpublish",
+            "description": "Owning professor only (H-15). Returns the game to a draft so it can be edited, and ends every run in progress. Safe to repeat. No game yet is 404 GAME_NOT_FOUND.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error cases",
+      "item": [
+        {
+          "name": "Malformed Authorization header",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token abc"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/me",
+            "description": "Sends a header that is not \"Bearer <token>\". Expect 401 INVALID_SESSION, with or without a database."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('rejects a malformed Authorization header', () => {",
+                  "  pm.response.to.have.status(401);",
+                  "  pm.expect(pm.response.json().error.code).to.eql('INVALID_SESSION');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unknown route",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/does-not-exist",
+            "description": "Expect 404 NOT_FOUND."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('unknown route returns a structured 404', () => {",
+                  "  pm.response.to.have.status(404);",
+                  "  pm.expect(pm.response.json().error.code).to.eql('NOT_FOUND');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ways back out (H-12)",
+      "item": [
+        {
+          "name": "Unclaim help request",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/help-requests/{{helpRequestId}}/unclaim",
+            "description": "The claiming mentor only (H-12, UX audit A3). No body. Returns a claimed request to open with claimedBy cleared; reopenCount is unchanged. 200 { id, status: \"open\", mentorId: null }. Once a hint is sent it is 409 INVALID_STATE, so after Respond to help request this run answers 409."
+          }
+        },
+        {
+          "name": "Withdraw help request",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/help-requests/{{helpRequestId}}",
+            "description": "The requester only (H-12, UX audit A2). Deletes the request while it is still open: 200 { id, withdrawn: true }. A claimed, responded or resolved request is 409 INVALID_STATE, which is what this run gets after Resolve help request."
+          }
+        },
+        {
+          "name": "Leave group",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/groups/{{groupId}}/leave",
+            "description": "Group members only (H-12, UX audit A4). No body. Allowed while the group's work is draft or returned, otherwise 409 INVALID_STATE. The leaver's tasks stay without an owner, and the last member out deletes the group. 200 { id, left: true, groupDeleted }."
+          }
+        },
+        {
+          "name": "Leave classroom",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}/leave",
+            "description": "Students only (H-12, UX audit A4). No body. 409 IN_A_GROUP while the student is in a group of one of the classroom's mini-projects. Otherwise removes the membership and its points, withdraws the student's open help requests and returns their unanswered claims to the queue; attempts stay. 200 { classroomId, left: true }."
+          }
+        },
+        {
+          "name": "Delete classroom",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/classrooms/{{classroomId}}",
+            "description": "Owning professor only (H-12, UX audit A6). Deletes the classroom and everything in it: attempts, help requests, groups, uploaded files, mini-projects, challenges and memberships. 204 with no body. It runs last on purpose: it removes the records this run created, so nothing after it needs them."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Log out (run last)",
+      "item": [
+        {
+          "name": "Log out",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/auth/logout",
+            "description": "G16. Ends this session only: 204 with no body. Runs last so the other requests keep the session. Without a session it is 401."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 204) {",
+                  "  pm.collectionVariables.set('sessionToken', '');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{sessionToken}}",
+        "type": "string"
+      }
+    ]
+  }
+}

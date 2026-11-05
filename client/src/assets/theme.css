@@ -1,0 +1,1718 @@
+/* Learn-E theme layer. Loaded after Bootstrap and before main.css.
+   Bootstrap runs in its own dark mode (data-bs-theme="dark" on <html>), and
+   this file sets its CSS variables to the Take a break games' palette in plain
+   CSS (no Sass build), plus a few le- prefixed classes. Colour values are
+   checked by the dark theme contrast script (plan 2026-10-29-dark-game-theme). */
+
+:root {
+  --le-base: #111620;
+  --le-canvas: #0b0e14;
+  --le-surface: #1e2430;
+  --le-wash: #1e2430;
+  --le-border: #333d52;
+  --le-input-border: #64718a;
+  --le-text: #eaf0f9;
+  --le-muted: #a2b0c5;
+  --le-action: #00f0ff;
+  --le-action-hover: #5cf6ff;
+  --le-action-active: #00f0ff;
+  --le-action-tint: #0f353f;
+  --le-action-tint-strong: #0d4f5a;
+  --le-on-action: #0b0e14;
+  --le-graphic: #00f0ff;
+  --le-violet: #c273ff;
+  --le-dark: #0b0e14;
+  --le-danger: #ff7a7a;
+  --le-danger-hover: #ff9d9d;
+  --le-danger-tint: #32242d;
+  --le-focus: #00f0ff;
+
+  --le-radius-card: 20px;
+  --le-radius-input: 12px;
+  --le-radius-pill: 50rem;
+  /* Shadows vanish on black, so panels rest flat and glow when used. */
+  --le-shadow-rest: none;
+  --le-glow: 0 0 0 1px var(--le-action), 0 0 18px rgb(0 240 255 / 30%);
+  --le-shadow-raised: var(--le-glow);
+  --le-shadow-menu: 0 16px 40px rgb(0 0 0 / 60%), 0 0 0 1px var(--le-border);
+  --le-ease: cubic-bezier(0.2, 0, 0, 1);
+  --le-duration: 180ms;
+  --le-transition:
+    color var(--le-duration) var(--le-ease), background-color var(--le-duration) var(--le-ease),
+    border-color var(--le-duration) var(--le-ease), box-shadow var(--le-duration) var(--le-ease),
+    transform var(--le-duration) var(--le-ease);
+
+  /* Fallbacks for pages without a section class. */
+  --section-accent: var(--le-action);
+  --section-tint: var(--le-action-tint);
+  --section-ink: var(--le-action-active);
+
+  --bs-body-font-family: 'Source Sans 3', system-ui, sans-serif;
+  --bs-font-monospace: 'Source Code Pro', ui-monospace, monospace;
+  --bs-body-color: var(--le-text);
+  --bs-body-color-rgb: 234, 240, 249;
+  --bs-body-bg: var(--le-base);
+  --bs-body-bg-rgb: 17, 22, 32;
+  --bs-body-line-height: 1.6;
+  --bs-heading-color: var(--le-text);
+  --bs-emphasis-color: #ffffff;
+  --bs-secondary-color: var(--le-muted);
+  --bs-secondary-bg: var(--le-surface);
+  --bs-tertiary-bg: var(--le-surface);
+  --bs-border-color: var(--le-border);
+  --bs-border-radius: 12px;
+  --bs-border-radius-sm: 8px;
+  --bs-border-radius-lg: 20px;
+  --bs-border-radius-xl: 24px;
+  --bs-border-radius-pill: var(--le-radius-pill);
+  --bs-primary: var(--le-action);
+  --bs-primary-rgb: 0, 240, 255;
+  --bs-primary-text-emphasis: var(--le-action);
+  --bs-primary-bg-subtle: var(--le-action-tint);
+  --bs-primary-border-subtle: var(--le-action-tint-strong);
+  --bs-link-color: var(--le-action);
+  --bs-link-color-rgb: 0, 240, 255;
+  --bs-link-hover-color: var(--le-action-hover);
+  --bs-link-hover-color-rgb: 92, 246, 255;
+  --bs-focus-ring-color: rgb(0 240 255 / 40%);
+}
+
+/* Section accents: tint for surfaces, accent for marks and for text on the tint. */
+.section-challenges {
+  --section-accent: #00f0ff;
+  --section-tint: #0f353f;
+  --section-ink: #00f0ff;
+}
+.section-help {
+  --section-accent: #00f5d4;
+  --section-tint: #0f3539;
+  --section-ink: #00f5d4;
+}
+.section-projects {
+  --section-accent: #ff6487;
+  --section-tint: #32212e;
+  --section-ink: #ff6487;
+}
+.section-progress {
+  --section-accent: #ffb800;
+  --section-tint: #322d1c;
+  --section-ink: #ffb800;
+}
+.section-games {
+  --section-accent: #c273ff;
+  --section-tint: #2c2140;
+  --section-ink: #d6a3ff;
+}
+
+/* Page canvas: the games' black with a faint cyan grid, as on the 2048 cover.
+   Set on body only, so panels that read --bs-body-bg stay solid. Muted text
+   over a grid line is 8.15:1. */
+body {
+  background-color: var(--le-canvas);
+  background-image:
+    linear-gradient(rgb(0 240 255 / 5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(0 240 255 / 5%) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-attachment: fixed;
+}
+@media print, (forced-colors: active) {
+  body {
+    background-image: none;
+  }
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+/* Page titles: tight like the game titles (Take a break uses -0.055em at 2.5rem
+   and up; these are smaller, so a little looser). Inside a section a thin accent
+   bar sits before the title (inline, so a wrapped title keeps it on line one). */
+.le-page-title {
+  letter-spacing: -0.04em;
+}
+.le-hero-title {
+  letter-spacing: -0.05em;
+}
+:is(.section-challenges, .section-help, .section-projects, .section-progress, .section-games)
+  .le-page-title::before {
+  content: '';
+  display: inline-block;
+  width: 0.375rem;
+  height: 1.1em;
+  margin-right: 0.625rem;
+  border-radius: var(--le-radius-pill);
+  background: var(--section-accent);
+  vertical-align: -0.2em;
+}
+/* The games' cyan full stop, drawn as an empty box so it never joins the
+   heading's accessible name. Only on titles whose wording never changes. */
+.le-hero-title::after,
+.le-title-dot::after {
+  content: '';
+  display: inline-block;
+  width: 0.2em;
+  height: 0.2em;
+  margin-left: 0.08em;
+  border-radius: 2px;
+  background: var(--le-action);
+  box-shadow: 0 0 8px rgb(0 240 255 / 60%);
+}
+
+/* Small labels in the games' monospace: eyebrows, nav groups, badges, statuses
+   and table headings. Numbers take the monospace too, like game scores. */
+.le-mono,
+.app-nav-label,
+.le-hero-kicker,
+.badge,
+.le-status,
+.table > thead > tr > th,
+.le-rows-head {
+  font-family: var(--bs-font-monospace);
+  font-weight: 600;
+}
+.app-nav-label,
+.le-hero-kicker,
+.badge,
+.le-status,
+.table > thead > tr > th,
+.le-rows-head {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.le-tiles dd,
+.le-stat-value,
+.le-num,
+.le-bar-count {
+  font-family: var(--bs-font-monospace);
+}
+
+/* Focus: a 2px cyan ring with a faint glow everywhere, replacing Bootstrap's pale shadows. */
+.btn:focus-visible,
+.nav-link:focus-visible,
+.navbar-toggler:focus-visible,
+.btn-close:focus-visible,
+.app-chip:focus-visible,
+.le-back-link:focus-visible {
+  outline: 2px solid var(--le-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 12px rgb(0 240 255 / 45%);
+}
+.navbar-toggler:focus,
+.btn-close:focus {
+  box-shadow: none;
+}
+
+/* Buttons: pill shape, 44px default height, press-down on :active. */
+.btn {
+  --bs-btn-padding-x: 1.25rem;
+  --bs-btn-padding-y: 0.5625rem;
+  --bs-btn-font-weight: 600;
+  --bs-btn-border-radius: var(--le-radius-pill);
+  transition: var(--le-transition);
+}
+/* Redefined after .btn because the .btn override above would otherwise win. */
+.btn-sm {
+  --bs-btn-padding-x: 0.875rem;
+  --bs-btn-padding-y: 0.3125rem;
+  --bs-btn-border-radius: var(--le-radius-pill);
+}
+.btn:active {
+  transform: scale(0.98);
+}
+.btn-primary {
+  --bs-btn-bg: var(--le-action);
+  --bs-btn-border-color: var(--le-action);
+  --bs-btn-hover-bg: var(--le-action-hover);
+  --bs-btn-hover-border-color: var(--le-action-hover);
+  --bs-btn-active-bg: var(--le-action-active);
+  --bs-btn-active-border-color: var(--le-action-active);
+  --bs-btn-color: var(--le-on-action);
+  --bs-btn-hover-color: var(--le-on-action);
+  --bs-btn-active-color: var(--le-on-action);
+  /* Disabled: grey on the raised fill at full opacity (muted text 7.07:1). Bootstrap's
+     faded cyan read as a teal button style of its own. */
+  --bs-btn-disabled-bg: var(--le-surface);
+  --bs-btn-disabled-border-color: var(--le-border);
+  --bs-btn-disabled-color: var(--le-muted);
+  --bs-btn-disabled-opacity: 1;
+}
+.btn-primary:hover {
+  box-shadow: 0 0 16px rgb(0 240 255 / 45%);
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--le-action);
+  --bs-btn-border-color: var(--le-action);
+  --bs-btn-hover-color: var(--le-action-active);
+  --bs-btn-hover-bg: var(--le-action-tint);
+  --bs-btn-hover-border-color: var(--le-action);
+  --bs-btn-active-color: var(--le-action-active);
+  --bs-btn-active-bg: var(--le-action-tint-strong);
+  --bs-btn-active-border-color: var(--le-action-active);
+  --bs-btn-disabled-color: var(--le-action);
+  --bs-btn-disabled-border-color: var(--le-action);
+}
+/* Panel fill with a slate edge; the label identifies it, so the edge needs no 3:1. */
+.btn-outline-secondary {
+  --bs-btn-color: var(--le-text);
+  --bs-btn-bg: var(--le-base);
+  --bs-btn-border-color: var(--le-input-border);
+  --bs-btn-hover-color: var(--le-action-active);
+  --bs-btn-hover-bg: var(--le-action-tint);
+  --bs-btn-hover-border-color: var(--le-input-border);
+  --bs-btn-active-color: var(--le-action-active);
+  --bs-btn-active-bg: var(--le-action-tint-strong);
+  --bs-btn-active-border-color: var(--le-input-border);
+  --bs-btn-disabled-color: var(--le-muted);
+  --bs-btn-disabled-bg: var(--le-base);
+  --bs-btn-disabled-border-color: var(--le-border);
+}
+/* A button that does nothing but keeps focus, such as Move up on the first repair step
+   Unlike disabled, aria-disabled leaves it in the Tab order, so focus stays on it after
+   the move. It takes each variant's disabled look, and hover changes nothing;
+   the focus outline above still shows. */
+.btn[aria-disabled='true'],
+.btn[aria-disabled='true']:hover,
+.btn[aria-disabled='true']:active {
+  color: var(--bs-btn-disabled-color);
+  background-color: var(--bs-btn-disabled-bg);
+  border-color: var(--bs-btn-disabled-border-color);
+  opacity: var(--bs-btn-disabled-opacity);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+/* Destructive actions in red (7.17:1 on the panel). */
+.btn-outline-danger {
+  --bs-btn-color: var(--le-danger);
+  --bs-btn-border-color: var(--le-danger);
+  --bs-btn-hover-color: var(--le-on-action);
+  --bs-btn-hover-bg: var(--le-danger);
+  --bs-btn-hover-border-color: var(--le-danger);
+  --bs-btn-active-color: var(--le-on-action);
+  --bs-btn-active-bg: var(--le-danger-hover);
+  --bs-btn-active-border-color: var(--le-danger-hover);
+}
+
+/* Form fields: dark fill, 3.7:1 slate border, 44px tall, cyan glow on focus. */
+.form-control,
+.form-select {
+  min-height: 44px;
+  border-color: var(--le-input-border);
+  border-radius: var(--le-radius-input);
+  background-color: var(--le-canvas);
+  transition: var(--le-transition);
+}
+.form-control:hover,
+.form-select:hover {
+  border-color: var(--le-muted);
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--le-action);
+  background-color: var(--le-canvas);
+  box-shadow:
+    0 0 0 1px var(--le-action),
+    0 0 14px rgb(0 240 255 / 30%);
+}
+.form-label {
+  margin-bottom: 0.375rem;
+  font-weight: 600;
+}
+.form-text {
+  margin-top: 0.375rem;
+  color: var(--le-muted);
+}
+/* Bootstrap's compiled :checked rule hard-codes its blue, so it needs its own. */
+.form-check-input {
+  border-color: var(--le-input-border);
+}
+.form-check-input:checked {
+  border-color: var(--le-action);
+  background-color: var(--le-action);
+}
+/* Bootstrap's marks are white; on the cyan fill they need the dark ink. */
+.form-check-input:checked[type='checkbox'] {
+  --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%230b0e14' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+}
+.form-check-input:checked[type='radio'] {
+  --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%230b0e14'/%3e%3c/svg%3e");
+}
+.form-check-input:focus {
+  border-color: var(--le-action);
+  box-shadow:
+    0 0 0 1px var(--le-action),
+    0 0 14px rgb(0 240 255 / 30%);
+}
+input[type='checkbox'],
+input[type='radio'],
+input[type='range'],
+progress {
+  accent-color: var(--le-action);
+}
+
+/* Cards: flat panel, slate hairline, larger radius. */
+.card {
+  --bs-card-border-color: var(--le-border);
+  --bs-card-border-radius: var(--le-radius-card);
+  --bs-card-inner-border-radius: calc(var(--le-radius-card) - 1px);
+  --bs-card-spacer-x: 1rem;
+  --bs-card-spacer-y: 1rem;
+  --bs-card-cap-bg: transparent;
+  box-shadow: var(--le-shadow-rest);
+}
+@media (min-width: 768px) {
+  .card {
+    --bs-card-spacer-x: 1.5rem;
+    --bs-card-spacer-y: 1.5rem;
+  }
+}
+.le-card-interactive {
+  transition: var(--le-transition);
+}
+.le-card-interactive:hover,
+.le-card-interactive:focus-within {
+  border-color: var(--section-accent);
+  box-shadow:
+    0 0 0 1px var(--section-accent),
+    0 0 22px color-mix(in srgb, var(--section-accent) 28%, transparent);
+}
+.le-card-interactive:hover {
+  transform: translateY(-2px);
+}
+.le-card-interactive:active {
+  transform: translateY(0);
+}
+/* Form tiles (create and join): the panel colour like other cards, but flat. */
+.le-tile {
+  box-shadow: none;
+}
+
+/* Covers are decorative CSS backgrounds, never <img>. */
+.le-cover {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background-color: var(--le-action-tint);
+}
+.le-cover-art {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  transition: transform 300ms var(--le-ease);
+}
+.le-card-interactive:hover .le-cover-art {
+  transform: scale(1.04);
+}
+.le-cover--card,
+.le-cover--hero {
+  border-radius: var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius) 0 0;
+}
+/* From 768px the classroom cover fills its column at the text's height. With the
+   16:9 ratio kept, a taller card (the owner's Review button, a long description)
+   made the cover wider than its column and it covered the title. */
+/* The create form's cover picker (decision G-10): a grid of small covers, each
+   the label of a hidden btn-check radio. The ring shows the chosen one. */
+.le-cover-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3.5rem, 1fr));
+  gap: 0.5rem;
+}
+.le-cover-option {
+  display: block;
+  aspect-ratio: 16 / 9;
+  border: 2px solid var(--le-border);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: var(--le-transition);
+}
+.le-cover-option-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-size: cover;
+}
+.le-cover-option:hover {
+  border-color: var(--le-input-border);
+}
+.btn-check:checked + .le-cover-option {
+  border-color: var(--le-action);
+  box-shadow: var(--le-glow);
+}
+.btn-check:focus-visible + .le-cover-option {
+  outline: 2px solid var(--le-focus);
+  outline-offset: 2px;
+}
+@media (min-width: 768px) {
+  .le-cover--hero {
+    height: 100%;
+    min-height: 12rem;
+    aspect-ratio: auto;
+    border-radius: var(--bs-card-inner-border-radius) 0 0 var(--bs-card-inner-border-radius);
+  }
+}
+
+/* Chips, badges and icons */
+.le-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: var(--le-radius-pill);
+  background: var(--le-action-tint);
+  color: var(--le-action-active);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.le-icon {
+  flex: none;
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.badge {
+  --bs-badge-font-weight: 600;
+  --bs-badge-padding-x: 0.625em;
+  --bs-badge-padding-y: 0.375em;
+  --bs-badge-border-radius: var(--le-radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  vertical-align: middle;
+}
+.le-badge-draft {
+  border: 1px solid var(--le-border);
+  background: var(--le-surface);
+  color: var(--le-muted);
+}
+.le-badge-published {
+  background: var(--section-tint);
+  color: var(--section-ink);
+}
+
+/* Alerts and toast-style messages */
+.alert {
+  --bs-alert-border-radius: 12px;
+  --bs-alert-padding-x: 1rem;
+  --bs-alert-padding-y: 0.875rem;
+  --bs-alert-border-color: transparent;
+}
+/* Bootstrap's dark secondary alert is a neutral grey; this puts it on the raised
+   fill with muted text (7.07:1). */
+.alert-secondary {
+  --bs-alert-bg: var(--le-surface);
+  --bs-alert-color: var(--le-muted);
+}
+.le-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.le-alert > .le-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
+}
+.le-alert-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Loading: the label stays as text for screen readers and sighted people; the
+   bars below it are decorative and shimmer. */
+.le-loading {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0 0 1.5rem;
+}
+.le-loading-label {
+  margin: 0;
+  color: var(--le-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.le-skeleton {
+  display: grid;
+  gap: 0.625rem;
+  max-width: 36rem;
+}
+.le-skeleton > span {
+  display: block;
+  height: 0.875rem;
+  border-radius: var(--le-radius-pill);
+  background: linear-gradient(
+    90deg,
+    var(--le-action-tint) 0%,
+    var(--le-base) 50%,
+    var(--le-action-tint) 100%
+  );
+  background-size: 200% 100%;
+  animation: le-shimmer 1.4s linear infinite;
+}
+.le-skeleton > span:nth-child(1) {
+  width: 60%;
+}
+.le-skeleton > span:nth-child(2) {
+  width: 90%;
+}
+.le-skeleton > span:nth-child(3) {
+  width: 75%;
+}
+@keyframes le-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+/* Empty states and placeholders: an icon tile, a headline, one line. */
+.le-empty .card-body {
+  display: grid;
+  justify-items: start;
+  gap: 0.5rem;
+}
+.le-empty .le-section-icon {
+  margin-bottom: 0.25rem;
+}
+.le-empty :is(h2, h3) {
+  margin: 0;
+}
+
+.le-toasts {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.le-toasts:empty {
+  display: none;
+}
+.le-toasts > .le-chip {
+  justify-self: start;
+}
+.le-toast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0;
+  box-shadow: var(--le-shadow-raised);
+  animation: le-toast-in var(--le-duration) var(--le-ease);
+}
+/* Panel fill keeps outline-button text readable on the tinted alert. */
+.le-toast .btn {
+  --bs-btn-bg: var(--le-base);
+}
+@keyframes le-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* App shell (UI refresh 3). Phones: the bar on top, then the page. From 768px
+   a 240px sidebar runs down the left and the bar and page sit to its
+   right. The header stays first in the source, so Tab goes chip, sidebar, page.
+   minmax(0, 1fr) lets the page column shrink below its widest content, so a
+   long code block cannot push the page sideways. */
+@media (min-width: 768px) {
+  .app-layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'side bar'
+      'side main';
+    min-height: 100vh;
+  }
+  .app-bar {
+    grid-area: bar;
+  }
+  .app-sidebar {
+    grid-area: side;
+  }
+  .app-main {
+    grid-area: main;
+  }
+  /* Logged out there is no sidebar (login is the only page), so one column. */
+  .app-layout-solo {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'bar'
+      'main';
+  }
+}
+.app-main {
+  min-width: 0;
+  padding: 1.5rem 1rem 3rem;
+}
+.app-main > .le-view {
+  max-width: 72rem;
+  margin-inline: auto;
+}
+@media (min-width: 768px) {
+  .app-main {
+    padding: 2rem 2rem 3rem;
+  }
+}
+
+/* Where an #id link lands (an error summary, the ready checklist, View code
+   snippet): the field or section stops below the sticky top bar, not under it. */
+input,
+select,
+textarea,
+button,
+[tabindex='-1'] {
+  scroll-margin-top: 5rem;
+}
+
+/* Top bar: the panel colour and the profile chip; on phones also the wordmark and
+   the menu button. Logged out it holds only the wordmark. */
+.app-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  border-bottom: 1px solid var(--le-border);
+  background: var(--le-base);
+}
+.app-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 64px;
+  padding: 0 1rem;
+}
+@media (min-width: 768px) {
+  .app-bar-inner {
+    justify-content: flex-end;
+    padding: 0 2rem;
+  }
+}
+/* Two copies (bar on phones, sidebar from 768px); one is always display: none,
+   so the page has one wordmark heading. */
+.app-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 auto 0 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.app-wordmark::before {
+  content: '';
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 5px;
+  background: linear-gradient(135deg, var(--le-action), var(--le-violet));
+}
+.app-nav-wrap {
+  order: 2;
+  position: relative;
+  padding: 0;
+}
+.navbar-toggler {
+  min-width: 44px;
+  min-height: 44px;
+  border-color: var(--le-border);
+  border-radius: 12px;
+}
+
+/* Profile chip (G12, decision G-12). At least 44px tall. Below 768px only the
+   avatar shows; the name stays readable to screen readers,
+   because it is the link's only text. */
+.app-chip {
+  order: 2;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.375rem 0.875rem;
+  border: 1px solid var(--le-border);
+  border-radius: var(--le-radius-pill);
+  color: var(--le-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: var(--le-transition);
+}
+.app-chip:hover {
+  background: var(--le-wash);
+  color: var(--le-text);
+}
+.app-chip:has(.app-chip-name) {
+  padding-left: 0.375rem;
+}
+.app-chip-name {
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 767.98px) {
+  .app-bar-inner {
+    gap: 0.5rem;
+  }
+  .app-chip:has(.app-chip-name) {
+    padding-right: 0.375rem;
+  }
+  .app-chip-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+}
+/* The narrowest phones: with "Server unavailable" the bar was 23px too wide at
+   320px, so the wordmark and gaps shrink a little and the menu button loses
+   some side padding (down to the 44px minimum). */
+@media (max-width: 359.98px) {
+  .app-bar-inner {
+    gap: 0.375rem;
+    padding: 0 0.75rem;
+  }
+  .app-bar .app-wordmark {
+    gap: 0.375rem;
+    font-size: 1.125rem;
+  }
+  .app-bar .navbar-toggler {
+    padding-inline: 0.375rem;
+  }
+}
+
+/* Sidebar (G11, decision G-11; regrouped in UI refresh 3). Panel colour, flush left,
+   full height and sticky. Account is pushed to the bottom. */
+.app-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid var(--le-border);
+  background: var(--le-base);
+}
+.app-sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 1.125rem 0.75rem 1rem;
+}
+.app-sidebar .app-wordmark {
+  min-height: calc(64px - 1.125rem);
+  margin: 0 0 1rem;
+  padding: 0 0.75rem;
+}
+.app-sidebar-nav {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.app-nav-label {
+  margin: 0 0 0.375rem;
+  padding: 0 0.75rem;
+  color: var(--le-muted);
+  font-size: 0.75rem;
+}
+.app-sidebar .app-nav-account {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--le-border);
+}
+
+/* Navigation items, shared by the sidebar and the phone menu. The current page
+   is a cyan tint with cyan text (9.31:1) and a glowing bar on its left edge. */
+.app-nav {
+  gap: 0.125rem;
+}
+.app-nav .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--le-muted);
+  font-weight: 600;
+  text-align: left;
+  transition: var(--le-transition);
+}
+.app-nav .nav-link .le-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.app-nav .nav-link:hover {
+  background: var(--le-wash);
+  color: var(--le-text);
+}
+.app-nav .nav-link[aria-current='page'] {
+  background: var(--le-action-tint);
+  color: var(--le-action-active);
+  box-shadow:
+    inset 3px 0 0 var(--le-action),
+    0 0 14px -4px rgb(0 240 255 / 50%);
+}
+.app-nav .nav-link[aria-current='page'] .le-icon {
+  color: var(--le-action);
+}
+/* Log out in red (7.17:1 on the panel, 5.83:1 on its hover tint). */
+.app-nav .app-logout {
+  color: var(--le-danger);
+}
+.app-nav .app-logout:hover {
+  background: var(--le-danger-tint);
+  color: var(--le-danger);
+}
+@media (max-width: 767.98px) {
+  .app-nav-wrap .navbar-collapse {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: 1030;
+    min-width: 14rem;
+    padding: 0.5rem;
+    border: 1px solid var(--le-border);
+    border-radius: 16px;
+    background: var(--le-base);
+    box-shadow: var(--le-shadow-menu);
+  }
+  .app-nav-wrap .app-nav-account {
+    margin-top: 0.375rem;
+    padding-top: 0.375rem;
+    border-top: 1px solid var(--le-border);
+  }
+}
+
+/* Section icon tile beside a card heading (help queue, profile, leaderboard). */
+.le-section-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 10px;
+  background: var(--section-tint);
+  color: var(--section-accent);
+}
+.le-section-icon .le-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.le-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.le-card-head > :is(h2, h3, h4, .h5, .h6) {
+  margin: 0;
+}
+.le-card-action {
+  margin-left: auto;
+}
+
+/* An error alert with its retry button on one row. */
+.le-alert-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+/* Panel fill keeps outline-button text readable on the tinted alert. */
+.le-alert-row .btn {
+  --bs-btn-bg: var(--le-base);
+}
+
+/* Help request status: neutral while open, section tint once a mentor is involved.
+   Every status shows its name as text, so colour is never the only cue. */
+.le-status {
+  border: 1px solid var(--le-border);
+  background: var(--le-surface);
+  color: var(--le-muted);
+}
+.le-status.is-active {
+  border-color: transparent;
+  background: var(--section-tint);
+  color: var(--section-ink);
+}
+
+/* Help queue: request cards and the open request's details. */
+.le-queue {
+  display: grid;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Each request's status line sits close under its own card and the next card is
+   further away, so the line reads as part of the card above. */
+.le-queue-caption {
+  margin: 0.5rem 0 0;
+  padding-inline: 1rem;
+  color: var(--le-muted);
+  font-size: 0.875rem;
+}
+.le-card-selected {
+  border-color: var(--section-accent);
+  box-shadow:
+    0 0 0 1px var(--section-accent),
+    0 0 18px color-mix(in srgb, var(--section-accent) 25%, transparent);
+}
+.le-request-text {
+  overflow-wrap: anywhere;
+}
+/* Text that keeps its line breaks, such as a repair order written out one step a line. */
+.le-pre-line {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.le-details {
+  display: grid;
+  gap: 0.125rem 1.25rem;
+  margin-bottom: 1rem;
+}
+.le-details dt {
+  color: var(--le-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.le-details dd {
+  min-width: 0; /* lets a long code snippet scroll inside its grid cell */
+  margin: 0 0 0.625rem;
+  overflow-wrap: anywhere;
+}
+/* Help queue ask form (H-14): the challenge and question menus stay a readable
+   width, and each radio choice keeps its description under its name. */
+.le-help-pick {
+  max-width: 32rem;
+}
+.le-hint-choice {
+  max-width: 40rem;
+  margin-bottom: 0.625rem;
+}
+@media (min-width: 576px) {
+  .le-details {
+    grid-template-columns: max-content 1fr;
+  }
+  .le-details dd {
+    margin-bottom: 0.5rem;
+  }
+}
+/* Summary tiles on the review page (G14). Scoped to .le-tiles, because the
+   dashboard's create and join cards also use .le-tile. Each tile is a column,
+   so the numbers line up along the bottom even when one label wraps further.
+   At most three per row (six tiles make two even rows), at least 9rem wide,
+   so two fit at 375px and one at 320px. On the progress tint the label is
+   7.58:1 and the number 14.74:1. */
+.le-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(9rem, calc((100% - 1.5rem) / 3)), 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1.5rem;
+}
+.le-tiles .le-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  border-radius: 12px;
+  background: var(--section-tint);
+}
+.le-tiles dt {
+  color: var(--section-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.le-tiles dd {
+  margin: 0;
+  color: var(--le-text);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+/* Wrong-option bars on the review page (G14). On phones the label sits on its
+   own line, so long option text wraps instead of squeezing the bar; from 576px
+   label, bar and count share one line, with long labels wrapping inside a
+   column of 35% of the row, at most 14rem, so the bar keeps most of the width
+   beside the sidebar too. The label already inherits break-word, so the
+   explicit anywhere only restates the step's rule. The width comes from the
+   template. The accent
+   bar is 4.5:1 or more on its tint track and on the panel (amber on the review
+   page: 7.93:1 and 10.44:1), and the count beside it says the same in text. */
+.le-bars {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.le-bar-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'label label'
+    'track count';
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+.le-bar-label {
+  grid-area: label;
+  overflow-wrap: anywhere;
+}
+.le-bar-track {
+  grid-area: track;
+  height: 0.75rem;
+  overflow: hidden;
+  border-radius: var(--le-radius-pill);
+  background: var(--section-tint);
+}
+.le-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--section-accent);
+}
+.le-bar-count {
+  grid-area: count;
+  min-width: 2ch;
+  font-weight: 600;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 576px) {
+  .le-bar-row {
+    grid-template-columns: minmax(0, min(14rem, 35%)) minmax(0, 1fr) auto;
+    grid-template-areas: 'label track count';
+  }
+}
+.le-callout {
+  padding: 0.875rem 1rem;
+  border-left: 4px solid var(--section-accent);
+  border-radius: 0 12px 12px 0;
+  background: var(--section-tint);
+  color: var(--section-ink);
+  overflow-wrap: anywhere;
+}
+.le-callout > :last-child {
+  margin-bottom: 0;
+}
+.le-subpanel {
+  padding: 1rem;
+  border: 1px solid var(--le-border);
+  border-radius: 16px;
+  background: var(--le-surface);
+}
+
+/* Profile and leaderboard numbers. */
+.le-num {
+  font-variant-numeric: tabular-nums;
+}
+.le-stat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.le-stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.le-badge-milestone {
+  background: var(--section-tint);
+  color: var(--section-ink);
+}
+
+/* Milestone ring (G13). The fill circle's outline is 100 long, so its
+   stroke-dasharray is the percentage. The track is a quarter accent mixed
+   into the tint, so an empty ring still shows. The ring is violet on every
+   page, like Take a break: the fill is 3.40:1 on its track and 6.20:1 on the
+   card. The sentence beside the ring carries the meaning. */
+.le-ring-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.le-ring {
+  --section-accent: var(--le-violet);
+  --section-tint: #2a233f;
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+}
+.le-ring circle {
+  fill: none;
+  stroke-width: 4;
+}
+.le-ring-track {
+  stroke: color-mix(in srgb, var(--section-accent) 25%, var(--section-tint));
+}
+/* With only a "from" frame, the animation ends on the value from the template. */
+.le-ring-fill {
+  stroke: var(--section-accent);
+  animation: le-ring-draw 600ms var(--le-ease);
+}
+@keyframes le-ring-draw {
+  from {
+    stroke-dasharray: 0 100;
+  }
+}
+
+/* Dashboard and Login banner: a dark panel with neon circuit art on the right,
+   faded out before it reaches the text. Text is 13.6:1 or more on both ends of
+   the gradient. */
+.le-hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem 1.25rem;
+  border: 1px solid var(--le-border);
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--le-base), var(--le-surface));
+  color: var(--le-text);
+}
+.le-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: min(60%, 28rem);
+  background: url('/art/circuit.svg') right center / cover no-repeat;
+  opacity: 0.6;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 45%);
+  mask-image: linear-gradient(90deg, transparent, #000 45%);
+  pointer-events: none;
+}
+.le-hero > * {
+  position: relative;
+  z-index: 1;
+}
+.le-hero-kicker {
+  margin-bottom: 0.5rem;
+  color: var(--le-action);
+  font-size: 0.75rem;
+}
+.le-hero-title {
+  margin-bottom: 0.25rem;
+  color: var(--le-text);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+}
+.le-hero > div > p:not(.le-hero-kicker) {
+  color: var(--le-muted);
+}
+/* On phones the title runs most of the width, so the art keeps to the bottom
+   corner. The login banner's sentence fills that corner, so it has no art there. */
+@media (max-width: 575.98px) {
+  .le-hero::after {
+    top: auto;
+    width: 45%;
+    height: 55%;
+  }
+  .le-login-hero::after {
+    display: none;
+  }
+}
+@media (min-width: 768px) {
+  .le-hero {
+    padding: 2rem;
+  }
+}
+
+/* Login: the banner and the two forms side by side from 768px, stacked below. */
+.le-login {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 64rem;
+  margin-inline: auto;
+}
+.le-login-hero {
+  margin-bottom: 0;
+}
+/* The login banner's text sits at the bottom, so its art runs across the top. */
+.le-login-hero::after {
+  inset: 0 0 auto;
+  width: auto;
+  height: 45%;
+  background-position: center;
+  -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent);
+  mask-image: linear-gradient(180deg, #000 30%, transparent);
+}
+.le-login-forms {
+  display: grid;
+  gap: 1.5rem;
+}
+@media (min-width: 768px) {
+  .le-login {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: start;
+  }
+  .le-login-hero {
+    position: sticky;
+    top: calc(64px + 2rem);
+    min-height: 22rem;
+    padding: 2.5rem 2rem;
+  }
+}
+
+/* Dashboard grid: 24px gaps at every width. */
+.le-card-grid {
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 1.5rem;
+}
+
+/* Classroom cards follow the reference's course cards: the cover inset with its
+   own radius, then the title, description and join code. */
+.le-course-card .le-cover--card {
+  margin: 0.75rem 0.75rem 0;
+  border-radius: 14px;
+}
+.le-course-card .card-title {
+  margin-bottom: 0.375rem;
+}
+.le-chip-code {
+  font-family: var(--bs-font-monospace);
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+}
+
+/* Course-card parts: a section-tinted chip, a person row and a card footer. */
+.le-chip-section {
+  max-width: 100%;
+  border-color: transparent;
+  background: var(--section-tint);
+  color: var(--section-ink);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+.le-person {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.le-person-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--section-tint);
+  color: var(--section-ink);
+}
+.le-person-icon .le-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.le-person-name {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.le-person-role {
+  margin: 0;
+  color: var(--le-muted);
+  font-size: 0.8125rem;
+}
+.le-card-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--le-border);
+}
+
+/* Row lists (professor review): stacked on phones, columns from 768px with a
+   pale header row. The header is aria-hidden; each cell names itself. */
+.le-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.le-rows-head {
+  display: none;
+}
+.le-row {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+.le-row + .le-row {
+  border-top: 1px solid var(--le-border);
+}
+.le-row > .badge {
+  justify-self: start;
+}
+@media (min-width: 768px) {
+  .le-rows-head,
+  .le-row {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.5fr) 7rem 7rem;
+    align-items: center;
+    column-gap: 1.25rem;
+  }
+  .le-rows-head {
+    display: grid;
+    padding: 0.625rem 1.25rem;
+    border-bottom: 1px solid var(--le-border);
+    background: var(--le-surface);
+    color: var(--le-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .le-row > :last-child,
+  .le-rows-head > :last-child {
+    justify-self: end;
+  }
+}
+
+/* GitHub evidence panel (F8, added 2026-10-24): two-column row lists at every
+   width, inset to line up with the card-body p-4 above them. */
+.le-rows-head.le-rows-2,
+.le-rows-2 > .le-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 1rem;
+}
+.le-rows-2 > .le-row > :first-child {
+  justify-self: stretch;
+}
+.le-rows-2 > .le-row > :last-child:not(:first-child) {
+  justify-self: end;
+}
+.le-gh .le-row,
+.le-gh .le-rows-head {
+  padding-inline: 1.5rem;
+}
+.le-gh-subhead {
+  margin: 0;
+  padding: 1rem 1.5rem 0.5rem;
+  border-top: 1px solid var(--le-border);
+}
+.le-gh-note {
+  margin: 0;
+  padding: 0 1.5rem 1rem;
+}
+.le-gh-foot {
+  padding: 1rem 1.5rem;
+}
+
+/* Challenge and mini-project pages (added 2026-10-22): code blocks, a progress
+   bar, plain row lists and bordered editor blocks. */
+.le-code {
+  margin: 0;
+  padding: 1rem 1.125rem;
+  border: 1px solid var(--le-border);
+  border-radius: 12px;
+  background: var(--le-surface);
+  color: var(--le-text);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+/* Back link above the title on challenge and mini-project pages, whose addresses
+   carry no classroom id, so the sidebar has no classroom group there. Muted text
+   is 8.79:1 on the page, cyan on hover 13.71:1. */
+.le-back-link {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+  padding-block: 0.25rem;
+  color: var(--le-muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+.le-back-link:hover {
+  color: var(--le-action);
+}
+/* Numbered code on the challenge page, for the "which line" questions. The numbers
+   come from a counter, so copying the code leaves them out. Muted on the raised
+   fill is 7.1:1. */
+.le-code-numbered code {
+  counter-reset: le-line;
+}
+.le-code-line {
+  display: block;
+}
+.le-code-line::before {
+  counter-increment: le-line;
+  content: counter(le-line);
+  display: inline-block;
+  min-width: 2ch;
+  margin-right: 1.25ch;
+  color: var(--le-muted);
+  text-align: right;
+  user-select: none;
+}
+/* The snippet and hints that each question's #id links lead back to. The ring
+   shows a keyboard user where focus landed. */
+.le-snippet-target {
+  border-radius: 0.5rem;
+}
+.le-snippet-target:focus-visible {
+  outline: 2px solid var(--le-focus);
+  outline-offset: 4px;
+}
+/* One step of a repair-order question: the step text, then Move up and Move down
+   side by side. The row sits inside the li, so the li stays a list item and keeps
+   its step number. The text takes the room left and wraps; once the row is too
+   narrow, the pair drops below it as one unit instead of one button at a time. */
+.le-step-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.le-step-label {
+  flex: 1 1 12rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.le-step-moves {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+/* Decorative only: the counts beside it carry the information. The track is the
+   neutral raised fill, so an empty bar does not read as a full teal one; cyan on
+   it is 11.04:1. */
+.le-progress {
+  height: 0.25rem;
+  margin: 0.5rem 0;
+  overflow: hidden;
+  border-radius: var(--le-radius-pill);
+  background: var(--le-surface);
+}
+.le-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--le-graphic);
+}
+.le-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.le-list > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 0;
+}
+.le-list > li + li {
+  border-top: 1px solid var(--le-border);
+}
+.le-block {
+  min-width: 0;
+  padding: 0.75rem 1.25rem 1.25rem;
+  border: 1px solid var(--le-border);
+  border-radius: 16px;
+  background: var(--le-base);
+}
+.le-block > legend {
+  float: none;
+  width: auto;
+  margin-bottom: 0.75rem;
+  padding: 0 0.375rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Table header: pale, small capitals, muted (5.74:1 on the surface fill). */
+.table > thead > tr > th {
+  --bs-table-bg: var(--le-surface);
+  color: var(--le-muted);
+  font-size: 0.75rem;
+}
+
+/* One row of the list editor (UX audit item 5): the item's box takes the room
+   and its Move and Remove buttons sit to the right, dropping underneath on a
+   phone. field-sizing lets the box grow with its text where the browser
+   supports it; elsewhere it keeps its rows and scrolls. */
+.le-list-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.le-list-input {
+  flex: 1 1 16rem;
+  min-width: 0;
+  field-sizing: content;
+  resize: vertical;
+}
+/* The (i) button beside a label (UX audit item 1). It keeps a 24px target
+   (WCAG 2.5.8) while the icon stays the size of the label text, and lines up
+   with the label's baseline. */
+.le-infotip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  padding: 0;
+  margin: -0.25rem 0 -0.25rem 0.125rem;
+  vertical-align: middle;
+  color: var(--le-muted);
+  border-radius: var(--le-radius-pill);
+}
+/* A label with an (i) after it flows inline, so a label that wraps on a phone
+   keeps the button after its last word. The button's bottom margin then
+   stands in for the label's, which an inline box can't have. */
+.form-label:has(+ .le-infotip) {
+  display: inline;
+}
+.form-label + .le-infotip {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  /* Measured in the browser: this puts the icon's centre on the centre of the
+     label text. The old -0.4rem left it about 3px low. */
+  vertical-align: -0.1875rem;
+}
+/* A legend with an (i) after it. Bootstrap floats every legend at full width
+   and clears whatever follows, which pushed the button onto its own line.
+   The legend shrinks to its text, the button sits beside it, and the next
+   thing (the tip's text or the fields) starts on a new line again. */
+legend.form-label:has(+ .le-infotip) {
+  width: auto;
+  margin-bottom: 0.5rem;
+}
+legend.form-label + .le-infotip {
+  clear: none;
+  margin-top: 0.0625rem;
+}
+legend.form-label + .le-infotip + * {
+  clear: left;
+}
+.le-infotip:hover,
+.le-infotip[aria-expanded='true'] {
+  color: var(--le-action);
+}
+/* The text the (i) button shows, on its own line under the label. */
+.le-infotip-text {
+  display: block;
+  max-width: 40rem;
+  margin: 0 0 0.5rem;
+}
+/* A heading with an (i) button after it. The button stays outside the
+   heading so it isn't read as part of the heading's or its section's name. */
+.le-heading-tip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+.le-heading-tip > :is(h2, h3, h4, h5, h6) {
+  margin-bottom: 0;
+}
+.le-heading-tip > .le-infotip-text {
+  flex-basis: 100%;
+  margin-bottom: 0;
+}
+/* Error summary (UX audit item 4): one Bootstrap alert listing every problem,
+   each a link to its field, in Learn-E's danger colours. */
+.le-error-summary {
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 2px solid var(--le-danger);
+  border-radius: var(--le-radius-input);
+  background: var(--le-danger-tint);
+  color: var(--le-text);
+}
+.le-error-summary h3 {
+  color: var(--le-danger);
+}
+.le-error-summary ul {
+  padding-left: 1.25rem;
+}
+.le-error-summary a {
+  color: var(--le-danger);
+  text-decoration: underline;
+}
+.le-error-summary a:hover {
+  color: var(--le-danger-hover);
+}
+/* "Ready to publish?" checklist (UX audit item 2). Ticked items fade back;
+   unticked ones are links to their field. */
+.le-checklist {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--le-border);
+  border-radius: var(--le-radius-input);
+}
+.le-checklist li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.125rem 0;
+}
+.le-checklist li .le-icon {
+  flex: none;
+  align-self: center;
+}
+.le-check-done {
+  color: var(--le-muted);
+}
+.le-check-done .le-icon {
+  color: var(--le-action);
+}
+
+/* Why a student can't claim yet, where the Claim button would be (UX audit
+   item 6). Capped so it wraps beside Open request instead of pushing it. */
+.le-claim-reason {
+  max-width: 22rem;
+  margin: 0;
+  align-self: center;
+}

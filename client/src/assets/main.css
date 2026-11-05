@@ -1,0 +1,14 @@
+body {
+  font-family: var(--bs-body-font-family);
+}
+:focus-visible {
+  outline: 3px solid var(--le-focus);
+  outline-offset: 3px;
+}
+pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+main {
+  overflow-wrap: anywhere;
+}

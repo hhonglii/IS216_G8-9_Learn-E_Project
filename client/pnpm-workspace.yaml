@@ -1,0 +1,4 @@
+# mongodb-memory-server's install script only pre-downloads MongoDB; the
+# product browser tests download it on first use instead (H1, decision H-5).
+allowBuilds:
+  mongodb-memory-server: false

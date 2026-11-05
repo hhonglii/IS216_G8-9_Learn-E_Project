@@ -1,0 +1,12 @@
+client/node_modules/
+client/dist/
+client/.env
+client/test-results/
+client/playwright-report/
+client/coverage/
+server/node_modules/
+server/.env
+server/coverage/
+.DS_Store
+*.log
+.vercel/
